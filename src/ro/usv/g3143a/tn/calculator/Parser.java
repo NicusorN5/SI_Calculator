@@ -163,6 +163,7 @@ public class Parser {
 			char op;
 			switch(t)
 			{
+			//TODO: Find a way to decide order.
 			case Plus:
 				op = '+';
 				break;
@@ -184,7 +185,7 @@ public class Parser {
 			try
 			{
 				r = applyOperator(a, op, b);
-				operands.add(r);
+				operands.add(r); //TODO: Could break with non-associative operations?
 			}
 			catch(ParserException ex)
 			{
