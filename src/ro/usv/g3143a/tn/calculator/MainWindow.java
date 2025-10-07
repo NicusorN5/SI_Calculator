@@ -8,7 +8,6 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.JTextPane;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
 import java.awt.event.ActionEvent;
 
 public class MainWindow extends JFrame {
@@ -225,6 +224,9 @@ public class MainWindow extends JFrame {
 					SetExpression(Evaluate()+"");
 				} catch (InvalidTokenException e1) {
 					SetExpression("Syntax error! " + e1.getMessage());
+				} catch (ArithmeticException e2)
+				{
+					SetExpression("ERR! " + e2.getMessage());
 				}
 			}
 		});

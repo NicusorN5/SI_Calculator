@@ -1,6 +1,7 @@
 package ro.usv.g3143a.tn.calculator;
 
 import java.util.ArrayList;
+import java.util.Stack;
 
 public class Parser {
 	
@@ -15,7 +16,7 @@ public class Parser {
 			try
 			{
 				//Check if currentToken is a number
-				float v = Float.valueOf(currentToken);
+				Float.valueOf(currentToken);
 				tokens.add(new Pair<String, TokenType>(currentToken, TokenType.Number));	
 			}
 			catch(NumberFormatException ex)
@@ -27,8 +28,9 @@ public class Parser {
 		tokens.add(new Pair<String, TokenType>(c+"", t));
 	};
 	
-	private void createTokens() throws InvalidTokenException
+	private void lexer() throws InvalidTokenException
 	{
+		//Single Layer FSM.
 		tokens = new ArrayList<Pair<String, TokenType>>();
 		
 		for(int i = 0; i < expression.length(); i++)
@@ -73,12 +75,106 @@ public class Parser {
 		}
 	}
 	
-	private void shuntingYard()
+	private float applyOperator(float a, char op, float b) throws ParserException {
+		switch(op) {
+		case '+':
+			return a+b;
+		case '-':
+			return a-b;
+		case '*':
+			return a*b;
+		case '/':
+			if(b == 0) {
+				if(a == 0) {
+					throw new ArithmeticException("0/0 is inderterminated");
+				}
+				else {
+					throw new ArithmeticException("Division by 0.");
+				}
+			}
+			return a/b;
+		default:
+			throw new ParserException("Invalid operator");
+		}
+	}
+	
+	private float shuntingYard() throws InvalidTokenException
 	{
+		//Simplified(?), function calls aren't used, neither are parenthesis.
+		
+		Stack<Float> operands = new Stack<Float>();
+		Stack<TokenType> operators = new Stack<TokenType>();
+		
+		float r = 0;
+		
+		//Fill stacks
 		for(int i =0; i < tokens.size(); ++i)
 		{
-			
+			TokenType op = tokens.get(i).Second; 
+			switch(op)
+			{
+			case Number:
+				String v = tokens.get(i).First; 
+				try {
+				operands.add(Float.valueOf(v));
+				}
+				catch(NumberFormatException ex)
+				{
+					throw new InvalidTokenException(v);
+				}
+				break;
+			case Plus:
+				operators.add(op);
+				break;
+			case Minus:
+				operators.add(op);
+				break;
+			case Mul:
+				operators.add(op);
+				break;
+			case Div:
+				operators.add(op);
+				break;
+			default:
+				break;
+			}
 		}
+		
+		//Pop stacks
+		while(operators.empty() != true)
+		{
+			TokenType t = operators.pop();
+
+			char op;
+			switch(t)
+			{
+			case Plus:
+				op = '+';
+				break;
+			case Minus:
+				op = '-';
+				break;
+			case Mul:
+				op = '*';
+				break;
+			case Div:
+				op = '/';
+				break;
+			default:
+				throw new InvalidTokenException(t+"");
+			}
+			
+			float a = operands.pop();
+			float b = operands.pop();
+			try
+			{
+				r = applyOperator(a, op, b);
+			}
+			catch(ParserException ex)
+			{
+			}
+		}
+		return r;
 	}
 	
 	public Parser(String exp)
@@ -88,8 +184,7 @@ public class Parser {
 	
 	public float Evaluate() throws InvalidTokenException
 	{
-		createTokens();
-		
-		return 0.0f;
+		lexer();
+		return shuntingYard();
 	}
 }
