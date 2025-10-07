@@ -30,22 +30,19 @@ public class MainWindow extends JFrame {
 			}
 		});
 	}
-
-	private String expression;
 	
 	public void SetExpression(String exp)
 	{
-		expression = exp;
 		textPane.setText(exp);
 	}
 	
 	public String GetExpression()
 	{
-		return expression;
+		return textPane.getText();
 	}
 	
 	private float Evaluate() throws InvalidTokenException {
-		expression = textPane.getText();
+		String expression = textPane.getText();
 		
 		if(expression.isEmpty())
 			return 0.0f;
@@ -65,7 +62,6 @@ public class MainWindow extends JFrame {
 	 */
 	public MainWindow() {
 		setTitle("Calculator");
-		expression = "";
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 269, 260);

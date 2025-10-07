@@ -33,10 +33,10 @@ public class Parser {
 		//Single Layer FSM.
 		tokens = new ArrayList<Pair<String, TokenType>>();
 		
+		String currentToken = "";
+		
 		for(int i = 0; i < expression.length(); i++)
-		{
-			String currentToken = "";
-			
+		{	
 			char c = expression.charAt(i);
 			
 			switch(c)
@@ -65,6 +65,7 @@ public class Parser {
 			case '*':
 				addOperator(TokenType.Mul, currentToken, c);
 				currentToken = "";
+				break;
 			case '/':
 				addOperator(TokenType.Div, currentToken, c);
 				currentToken = "";
@@ -73,9 +74,22 @@ public class Parser {
 				throw new InvalidTokenException(currentToken);
 			}
 		}
+		
+		//Try to add last number if any.
+		if(currentToken.isEmpty() == false)
+		{
+			try
+			{
+				Float.valueOf(currentToken);
+				tokens.add(new Pair<String, TokenType>(currentToken, TokenType.Number));	
+			}
+			catch(NumberFormatException ex)
+			{
+			}
+		}
 	}
 	
-	private float applyOperator(float a, char op, float b) throws ParserException {
+	private float applyOperator(float a, char op, float b) throws ParserException, ArithmeticException {
 		switch(op) {
 		case '+':
 			return a+b;
@@ -88,9 +102,8 @@ public class Parser {
 				if(a == 0) {
 					throw new ArithmeticException("0/0 is inderterminated");
 				}
-				else {
-					throw new ArithmeticException("Division by 0.");
-				}
+				
+				throw new ArithmeticException("Division by 0.");
 			}
 			return a/b;
 		default:
@@ -101,6 +114,7 @@ public class Parser {
 	private float shuntingYard() throws InvalidTokenException
 	{
 		//Simplified(?), function calls aren't used, neither are parenthesis.
+		//Not really the Shunting-Yard algorithm implementation, this is just an attempt.
 		
 		Stack<Float> operands = new Stack<Float>();
 		Stack<TokenType> operators = new Stack<TokenType>();
@@ -169,12 +183,13 @@ public class Parser {
 			try
 			{
 				r = applyOperator(a, op, b);
+				operands.add(r);
 			}
 			catch(ParserException ex)
 			{
 			}
 		}
-		return r;
+		return operands.pop();
 	}
 	
 	public Parser(String exp)
