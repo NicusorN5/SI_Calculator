@@ -98,8 +98,9 @@ public class Parser {
 		case '*':
 			return a*b;
 		case '/':
-			if(b == 0) {
-				if(a == 0) {
+			//a and b are swapped!!
+			if(a == 0) {
+				if(b == 0) {
 					throw new ArithmeticException("0/0 is inderterminated");
 				}
 				
